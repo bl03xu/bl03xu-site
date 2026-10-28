@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BL03XU</title>
+<style>
+  body { margin: 0; font-family: sans-serif; color: #222; background: #fff; }
+  .wrap { display: flex; min-height: 100vh; }
+  nav { width: 1%; min-width: max-content; padding: 16px 12px; border-right: 1px solid #ccc; background: #f5f5f5; white-space: nowrap; }
+  nav a { display: block; padding: 6px 4px; color: #1a4e8a; text-decoration: none; }
+  nav a.active { font-weight: bold; background: #e0e8f2; }
+  main { flex: 1; padding: 16px 24px; max-width: 900px; min-width: 0; }
+  section { display: none; }
+  section.active { display: block; }
+  h1 { font-size: 1.4em; border-bottom: 2px solid #1a4e8a; padding-bottom: 6px; }
+  h2 { font-size: 1.1em; margin-top: 1.5em; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  .kv th { width: 12em; }
+  .todo { color: #b00; }
+  .gcal { width: 100%; height: 600px; border: 1px solid #ccc; }
+  @media (max-width: 600px) { main { padding: 12px; } th, td { padding: 4px 6px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#information">Information</a>
+    <a href="#spec">BL Spec</a>
+    <a href="#calendar">Calender</a>
+  </nav>
+  <main>
+
+    <section id="home">
+      <h1>BL03XU</h1>
+      <p>SPring-8 BL03XU のユーザー利用カレンダーおよび装置情報のページです。<span class="todo">【ビームラインの概要を記入】</span></p>
+      <p>お問い合わせ: masunaga@jasri.jp</p>
+    </section>
+
+    <section id="information">
+      <h1>Information</h1>
+      <table class="kv">
+        <tr><th>お知らせ</th><td><span class="todo">【日付・内容を記入】</span></td></tr>
+        <tr><th>利用申請</th><td><span class="todo">【申請方法・リンクを記入】</span></td></tr>
+        <tr><th>連絡先</th><td>masunaga@jasri.jp</td></tr>
+      </table>
+    </section>
+
+    <section id="spec">
+      <h1>BL Spec</h1>
+      <table class="kv">
+        <tr><th>光源</th><td><span class="todo">【記入】</span></td></tr>
+        <tr><th>エネルギー範囲</th><td><span class="todo">【記入】</span></td></tr>
+        <tr><th>ビームサイズ</th><td><span class="todo">【記入】</span></td></tr>
+        <tr><th>測定手法</th><td><span class="todo">【記入】</span></td></tr>
+        <tr><th>検出器</th><td><span class="todo">【記入】</span></td></tr>
+        <tr><th>試料環境・付帯設備</th><td><span class="todo">【記入】</span></td></tr>
+      </table>
+    </section>
+
+    <section id="calendar">
+      <h1>Calender</h1>
+      <p>ユーザー利用スケジュール</p>
+      <iframe class="gcal" src="https://calendar.google.com/calendar/embed?src=s0a9tr71l5u6vt8qsjsp3o1150%40group.calendar.google.com&amp;ctz=Asia%2FTokyo" title="BL03XU ユーザー利用カレンダー"></iframe>
+    </section>
+
+  </main>
+</div>
+<script>
+  var ids = ["home", "information", "spec", "calendar"];
+  function show() {
+    var id = location.hash.slice(1);
+    if (ids.indexOf(id) < 0) id = "home";
+    ids.forEach(function (i) {
+      document.getElementById(i).classList.toggle("active", i === id);
+      document.querySelector('nav a[href="#' + i + '"]').classList.toggle("active", i === id);
+    });
+  }
+  window.addEventListener("hashchange", show);
+  show();
+</script>
+</body>
+</html>
