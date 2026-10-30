@@ -210,7 +210,9 @@ var RQ_DEFAULT_DAYS = 14;
     var again = document.querySelector("#rq-table td[data-k='" + k + "']"); if (again) again.focus();
   }
 
-  function csvCell(v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function csvCell(v) { v = String(v == null ? "" : v);
+    if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; // Excel で数式として解釈されないようにする
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function buildCsv() {
     var now = new Date();
     var rows = [
@@ -236,7 +238,10 @@ var RQ_DEFAULT_DAYS = 14;
 
   function validate() {
     if (!$("rq-user").value.trim()) { say("ユーザー名を入力してください。", "err"); $("rq-user").focus(); return false; }
-    if (!Object.keys(st.cells).length) { say("表に1つ以上入力してください。", "err"); return false; }
+    // 表示中の期間・列にある入力だけを数える（期間を動かして見えなくなった入力は数えない）
+    var n = 0;
+    dates().forEach(function (d) { st.methods.forEach(function (m) { if (st.cells[d.iso + "|" + m.id]) n++; }); });
+    if (!n) { say("表に1つ以上入力してください。", "err"); return false; }
     return true;
   }
 
@@ -284,8 +289,12 @@ var RQ_DEFAULT_DAYS = 14;
   });
   tbl.addEventListener("change", function (e) {
     var id = e.target.getAttribute("data-ren"); if (!id) return;
-    st.methods.forEach(function (m) { if (m.id === id) m.name = e.target.value.trim() || m.name; });
-    render();
+    var m = st.methods.filter(function (x) { return x.id === id; })[0]; if (!m) return;
+    m.name = e.target.value.trim() || m.name; e.target.value = m.name;
+    // 表を作り直すと直後のクリックが失われるため、この列の表示だけ更新する
+    tbl.querySelector("[data-del='" + id + "']").setAttribute("aria-label", m.name + "の列を削除");
+    tbl.querySelectorAll("td[data-k$='|" + id + "']").forEach(function (td) {
+      td.setAttribute("aria-label", td.parentNode.cells[0].textContent + " " + m.name + " " + (td.textContent || "未入力")); });
   });
   $("rq-addm").onclick = function () {
     var n = $("rq-newm").value.trim(); if (!n) return;
@@ -293,7 +302,7 @@ var RQ_DEFAULT_DAYS = 14;
   };
   $("rq-newm").addEventListener("keydown", function (e) { if (e.key === "Enter") $("rq-addm").click(); });
   $("rq-start").onchange = function () { if ($("rq-start").value) { st.start = $("rq-start").value; render(); } };
-  $("rq-days").onchange = function () { st.days = Math.min(120, Math.max(1, +$("rq-days").value || 1)); render(); };
+  $("rq-days").onchange = function () { st.days = Math.min(120, Math.max(1, Math.floor(+$("rq-days").value) || 1)); render(); };
   $("rq-submit").onclick = submit;
   $("rq-csv").onclick = downloadCsv;
   $("rq-clear").onclick = function () { if (confirm("入力内容をすべて消去しますか？")) { reset(); say(""); } };
