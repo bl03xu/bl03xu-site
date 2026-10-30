@@ -22,6 +22,32 @@
   .todo { color: #b00; }
   .gcal { width: 100%; height: 600px; border: 1px solid #ccc; }
   @media (max-width: 600px) { main { padding: 12px; } th, td { padding: 4px 6px; } }
+
+  /* ---- Request（星取り表） ---- */
+  .rq input[type=text], .rq input[type=date], .rq input[type=number], .rq textarea {
+    font: inherit; border: 1px solid #ccc; border-radius: 3px; padding: 4px 6px; }
+  .rq input[type=text], .rq textarea { width: 100%; box-sizing: border-box; }
+  .rq input[type=number] { width: 5em; }
+  .rq button { font: inherit; padding: 6px 14px; border: 1px solid #1a4e8a; border-radius: 3px;
+    background: #fff; color: #1a4e8a; cursor: pointer; }
+  .rq button.primary { background: #1a4e8a; color: #fff; }
+  .rq button:disabled { opacity: .5; cursor: default; }
+  .rq .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+  .rq .req { color: #b00; }
+  .hs-wrap { overflow-x: auto; margin: 8px 0; }
+  table.hs { width: auto; min-width: 100%; }
+  table.hs th, table.hs td { text-align: center; vertical-align: middle; white-space: nowrap; }
+  table.hs th.d, table.hs td.d { text-align: left; position: sticky; left: 0; background: #f0f0f0; }
+  table.hs .mh { display: flex; align-items: center; gap: 2px; justify-content: center; }
+  table.hs .mh input { border: 0; background: transparent; font-weight: bold; text-align: center; width: 7em; padding: 2px; }
+  table.hs .mh button { border: 0; padding: 0 4px; color: #888; background: none; }
+  table.hs td.c { min-width: 4.5em; height: 34px; font-size: 1.2em; font-weight: bold; cursor: pointer; user-select: none; padding: 0; }
+  table.hs td.c:hover { background: #eef3f9; }
+  table.hs td.c:focus-visible { outline: 2px solid #1a4e8a; outline-offset: -2px; }
+  .m-ok { color: #1f7a45; } .m-may { color: #b07a00; } .m-ng { color: #b00; }
+  .dow0 { color: #b00; } .dow6 { color: #1a4e8a; }
+  .rq .status { min-height: 1.4em; font-size: .9em; }
+  .rq .status.err { color: #b00; } .rq .status.ok { color: #1f7a45; }
 </style>
 </head>
 <body>
@@ -31,13 +57,14 @@
     <a href="#information">Information</a>
     <a href="#spec">BL Spec</a>
     <a href="#calendar">Calender</a>
+    <a href="#request">Request</a>
   </nav>
   <main>
 
     <section id="home">
       <h1>BL03XU</h1>
       <p>SPring-8 BL03XU のユーザー利用カレンダーおよび装置情報のページです。<span class="todo">【ビームラインの概要を記入】</span></p>
-      <p>お問い合わせ: 増永あっとjasri.jp（増永はローマ字、あっとはアットマーク）</p>
+      <p>お問い合わせ: masunaga@jasri.jp</p>
     </section>
 
     <section id="information">
@@ -45,7 +72,7 @@
       <table class="kv">
         <tr><th>お知らせ</th><td><span class="todo">【日付・内容を記入】</span></td></tr>
         <tr><th>利用申請</th><td><span class="todo">【申請方法・リンクを記入】</span></td></tr>
-        <tr><th>連絡先</th><td>増永あっとjasri.jp（増永はローマ字、あっとはアットマーク）</td></tr>
+        <tr><th>連絡先</th><td>masunaga@jasri.jp</td></tr>
       </table>
     </section>
 
@@ -67,10 +94,38 @@
       <iframe class="gcal" src="https://calendar.google.com/calendar/embed?src=s0a9tr71l5u6vt8qsjsp3o1150%40group.calendar.google.com&amp;ctz=Asia%2FTokyo" title="BL03XU ユーザー利用カレンダー"></iframe>
     </section>
 
+
+    <section id="request" class="rq">
+      <h1>Request</h1>
+      <p>希望日程を測定手法ごとに入力し、「確定して送信」を押してください。マスをタップすると ○（希望）→ △（可）→ ×（不可）→ 空欄 の順に切り替わります。入力内容はこのページを閉じる・再読み込みすると消えます。</p>
+
+      <table class="kv">
+        <tr><th>ユーザー名 <span class="req">*</span></th><td><input type="text" id="rq-user" autocomplete="name"></td></tr>
+        <tr><th>期間</th><td><div class="row" style="margin:0">
+          開始日 <input type="date" id="rq-start"> 日数 <input type="number" id="rq-days" min="1" max="120"></div></td></tr>
+        <tr><th>備考</th><td><textarea id="rq-note" rows="2"></textarea></td></tr>
+      </table>
+
+      <h2>測定手法</h2>
+      <div class="row">
+        <input type="text" id="rq-newm" placeholder="測定手法を入力" style="width:14em">
+        <button type="button" id="rq-addm">列を追加</button>
+      </div>
+
+      <div class="hs-wrap"><table class="hs" id="rq-table"></table></div>
+
+      <div class="row">
+        <button type="button" class="primary" id="rq-submit">確定して送信</button>
+        <button type="button" id="rq-csv">CSVを保存</button>
+        <button type="button" id="rq-clear">クリア</button>
+      </div>
+      <p class="status" id="rq-status" role="status"></p>
+    </section>
+
   </main>
 </div>
 <script>
-  var ids = ["home", "information", "spec", "calendar"];
+  var ids = ["home", "information", "spec", "calendar", "request"];
   function show() {
     var id = location.hash.slice(1);
     if (ids.indexOf(id) < 0) id = "home";
@@ -81,6 +136,170 @@
   }
   window.addEventListener("hashchange", show);
   show();
+</script>
+
+<script>
+/* ===== Request（星取り表）設定 ===== */
+// Google Apps Script のウェブアプリURL（Code.gs をデプロイして発行されたもの）
+var RQ_GAS_URL = "";
+// 最初から表示しておく測定手法（例：["XRD", "XAFS", "SAXS"]）。ユーザーが追加・変更・削除できます
+var RQ_DEFAULT_METHODS = ["測定手法1", "測定手法2"];
+// 最初に表示する期間
+var RQ_DEFAULT_DAYS = 14;
+
+(function () {
+  var MARKS = ["", "○", "△", "×"];
+  var CLS = { "○": "m-ok", "△": "m-may", "×": "m-ng" };
+  var st;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  }
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function esc(x) { return String(x).replace(/[&<>"']/g, function (m) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]; }); }
+
+  // 保存はしない：再読み込み・他の人のアクセスでは常に空の状態から始まる
+  function reset() {
+    st = { start: today(), days: RQ_DEFAULT_DAYS, cells: {},
+      methods: RQ_DEFAULT_METHODS.map(function (n, i) { return { id: "m" + i, name: n }; }) };
+    $("rq-user").value = ""; $("rq-note").value = "";
+    render();
+  }
+
+  function dates() {
+    var out = [], b = new Date(st.start + "T00:00:00");
+    for (var i = 0; i < st.days; i++) {
+      var x = new Date(b); x.setDate(b.getDate() + i);
+      out.push({ iso: x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate()),
+        dow: x.getDay(), w: "日月火水木金土"[x.getDay()],
+        label: (x.getMonth() + 1) + "/" + x.getDate() + "（" + "日月火水木金土"[x.getDay()] + "）" });
+    }
+    return out;
+  }
+
+  function render() {
+    $("rq-start").value = st.start; $("rq-days").value = st.days;
+    var t = $("rq-table");
+    if (!st.methods.length) { t.innerHTML = "<tr><td>測定手法を追加してください。</td></tr>"; return; }
+    var h = "<thead><tr><th class='d'>日付</th>";
+    st.methods.forEach(function (m) {
+      h += "<th><div class='mh'><input value='" + esc(m.name) + "' data-ren='" + m.id + "' aria-label='測定手法名'>" +
+        "<button type='button' data-del='" + m.id + "' aria-label='" + esc(m.name) + "の列を削除'>×</button></div></th>";
+    });
+    h += "</tr></thead><tbody>";
+    dates().forEach(function (d) {
+      h += "<tr><td class='d dow" + d.dow + "'>" + d.label + "</td>";
+      st.methods.forEach(function (m) {
+        var k = d.iso + "|" + m.id, v = st.cells[k] || "";
+        h += "<td class='c " + (CLS[v] || "") + "' tabindex='0' data-k='" + k + "' aria-label='" +
+          d.label + " " + esc(m.name) + " " + (v || "未入力") + "'>" + v + "</td>";
+      });
+      h += "</tr>";
+    });
+    t.innerHTML = h + "</tbody>";
+  }
+
+  function cycle(td) {
+    var k = td.getAttribute("data-k");
+    var nx = MARKS[(MARKS.indexOf(st.cells[k] || "") + 1) % MARKS.length];
+    if (nx) st.cells[k] = nx; else delete st.cells[k];
+    render();
+    var again = document.querySelector("#rq-table td[data-k='" + k + "']"); if (again) again.focus();
+  }
+
+  function csvCell(v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function buildCsv() {
+    var now = new Date();
+    var rows = [
+      ["ユーザー名", $("rq-user").value.trim()],
+      ["備考", $("rq-note").value.trim()],
+      ["作成日時", now.toLocaleString("ja-JP")],
+      [],
+      ["日付", "曜日"].concat(st.methods.map(function (m) { return m.name; }))
+    ];
+    dates().forEach(function (d) {
+      rows.push([d.iso, d.w].concat(st.methods.map(function (m) { return st.cells[d.iso + "|" + m.id] || ""; })));
+    });
+    return rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n");
+  }
+  function fileName() {
+    var u = $("rq-user").value.trim().replace(/[\\\/:*?"<>|\s]+/g, "_") || "noname";
+    var d = new Date();
+    return "BL03XU_" + u + "_" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "_" +
+      pad(d.getHours()) + pad(d.getMinutes()) + ".csv";
+  }
+
+  function say(msg, cls) { var e = $("rq-status"); e.textContent = msg; e.className = "status " + (cls || ""); }
+
+  function validate() {
+    if (!$("rq-user").value.trim()) { say("ユーザー名を入力してください。", "err"); $("rq-user").focus(); return false; }
+    if (!Object.keys(st.cells).length) { say("表に1つ以上入力してください。", "err"); return false; }
+    return true;
+  }
+
+  async function submit() {
+    if (!validate()) return;
+    if (!RQ_GAS_URL) { say("送信先が未設定です。管理者にお問い合わせください（「CSVを保存」で手元に保存できます）。", "err"); return; }
+    if (!confirm("この内容で送信しますか？")) return;
+    var btn = $("rq-submit"); btn.disabled = true; say("送信中…");
+    try {
+      var r = await fetch(RQ_GAS_URL, { method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ user: $("rq-user").value.trim(), note: $("rq-note").value.trim(),
+          filename: fileName(), csv: buildCsv() }) });
+      var d = await r.json();
+      if (!d.ok) throw new Error(d.error || "unknown");
+      reset();
+      say("送信しました。入力内容はクリアされました。", "ok");
+    } catch (e) {
+      say("送信に失敗しました。時間をおいて再度お試しください。（" + e.message + "）", "err");
+    } finally { btn.disabled = false; }
+  }
+
+  function downloadCsv() {
+    if (!validate()) return;
+    var blob = new Blob(["\uFEFF" + buildCsv()], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = fileName(); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  var tbl = $("rq-table");
+  tbl.addEventListener("click", function (e) {
+    var td = e.target.closest("td.c"); if (td) return cycle(td);
+    var del = e.target.closest("[data-del]");
+    if (del) {
+      var id = del.getAttribute("data-del");
+      st.methods = st.methods.filter(function (m) { return m.id !== id; });
+      Object.keys(st.cells).forEach(function (k) { if (k.slice(-id.length - 1) === "|" + id) delete st.cells[k]; });
+      render();
+    }
+  });
+  tbl.addEventListener("keydown", function (e) {
+    var td = e.target.closest("td.c");
+    if (td && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); cycle(td); }
+  });
+  tbl.addEventListener("change", function (e) {
+    var id = e.target.getAttribute("data-ren"); if (!id) return;
+    st.methods.forEach(function (m) { if (m.id === id) m.name = e.target.value.trim() || m.name; });
+    render();
+  });
+  $("rq-addm").onclick = function () {
+    var n = $("rq-newm").value.trim(); if (!n) return;
+    st.methods.push({ id: "m" + Date.now().toString(36), name: n }); $("rq-newm").value = ""; render();
+  };
+  $("rq-newm").addEventListener("keydown", function (e) { if (e.key === "Enter") $("rq-addm").click(); });
+  $("rq-start").onchange = function () { if ($("rq-start").value) { st.start = $("rq-start").value; render(); } };
+  $("rq-days").onchange = function () { st.days = Math.min(120, Math.max(1, +$("rq-days").value || 1)); render(); };
+  $("rq-submit").onclick = submit;
+  $("rq-csv").onclick = downloadCsv;
+  $("rq-clear").onclick = function () { if (confirm("入力内容をすべて消去しますか？")) { reset(); say(""); } };
+
+  reset();
+})();
 </script>
 </body>
 </html>
